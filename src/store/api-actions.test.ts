@@ -12,6 +12,7 @@ import {
   fetchActiveOfferAction,
   fetchFavoritesAction,
   fetchOffersAction,
+  fetchOffersNearbyAction,
   loginAction,
   logoutAction,
 } from './api-actions';
@@ -108,7 +109,7 @@ describe('Async actions', () => {
       const extractedActionsTypes = extractActionsTypes(emittedActions);
       const fetchActiveOfferActionFulfilled = emittedActions.at(
         1
-      ) as ReturnType<typeof fetchOffersAction.fulfilled>;
+      ) as ReturnType<typeof fetchActiveOfferAction.fulfilled>;
 
       expect(extractedActionsTypes).toEqual([
         fetchActiveOfferAction.pending.type,
@@ -128,6 +129,46 @@ describe('Async actions', () => {
       expect(actions).toEqual([
         fetchActiveOfferAction.pending.type,
         fetchActiveOfferAction.rejected.type,
+      ]);
+    });
+  });
+
+  describe('fetchOffersNearbyAction', () => {
+    it('should dispatch "fetchOffersNearbyAction.pending", "fetchOffersNearbyAction.fulfilled", when server response 200', async () => {
+      const offerId = 'dsf569ghr6g4';
+      const mockOffers = makeFakeOffers();
+      mockAxiosAdapter
+        .onGet(`${APIRoute.Offers}/${offerId}${APIRoute.Nearby}`)
+        .reply(200, mockOffers);
+
+      await store.dispatch(fetchOffersNearbyAction(offerId));
+
+      const emittedActions = store.getActions();
+      const extractedActionsTypes = extractActionsTypes(emittedActions);
+      const fetchOffersNearbyActionFulfilled = emittedActions.at(
+        1
+      ) as ReturnType<typeof fetchOffersNearbyAction.fulfilled>;
+
+      expect(extractedActionsTypes).toEqual([
+        fetchOffersNearbyAction.pending.type,
+        fetchOffersNearbyAction.fulfilled.type,
+      ]);
+
+      expect(fetchOffersNearbyActionFulfilled.payload).toEqual(mockOffers);
+    });
+
+    it('should dispatch "fetchOffersNearbyAction.pending", "fetchOffersNearbyAction.rejected" when server response 400', async () => {
+      const offerId = 'dsf569ghr6g4';
+      mockAxiosAdapter
+        .onGet(`${APIRoute.Offers}/${offerId}${APIRoute.Nearby}`)
+        .reply(404, []);
+
+      await store.dispatch(fetchOffersNearbyAction(offerId));
+      const actions = extractActionsTypes(store.getActions());
+
+      expect(actions).toEqual([
+        fetchOffersNearbyAction.pending.type,
+        fetchOffersNearbyAction.rejected.type,
       ]);
     });
   });
