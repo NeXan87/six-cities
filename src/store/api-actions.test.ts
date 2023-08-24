@@ -17,6 +17,7 @@ import {
   fetchReviewsAction,
   loginAction,
   logoutAction,
+  postReviewAction,
 } from './api-actions';
 import { APIRoute } from '../constants';
 import axios from 'axios';
@@ -286,6 +287,57 @@ describe('Async actions', () => {
       expect(actions).toEqual([
         fetchReviewsAction.pending.type,
         fetchReviewsAction.rejected.type,
+      ]);
+    });
+  });
+
+  describe('postReviewAction', () => {
+    it('should dispatch "postReviewAction.pending", "postReviewAction.fulfilled", when server response 200', async () => {
+      const offerId = 'dsf569ghr6g4';
+      const mockReviews = makeFakeReviews();
+      mockAxiosAdapter
+        .onPost(`${APIRoute.Reviews}/${offerId}`)
+        .reply(200, mockReviews);
+
+      await store.dispatch(
+        postReviewAction({
+          id: offerId,
+          rating: 5,
+          comment: 'Привет, мир!',
+        })
+      );
+
+      const emittedActions = store.getActions();
+      const extractedActionsTypes = extractActionsTypes(emittedActions);
+      const postReviewActionFulfilled = emittedActions.at(1) as ReturnType<
+        typeof postReviewAction.fulfilled
+      >;
+
+      expect(extractedActionsTypes).toEqual([
+        postReviewAction.pending.type,
+        postReviewAction.fulfilled.type,
+      ]);
+
+      expect(postReviewActionFulfilled.payload).toEqual(mockReviews);
+    });
+
+    it('should dispatch "postReviewAction.pending", "postReviewAction.rejected" when server response 404', async () => {
+      const offerId = 'dsf569ghr6g4';
+      mockAxiosAdapter.onPost(`${APIRoute.Reviews}/${offerId}`).reply(404, []);
+
+      await store.dispatch(
+        postReviewAction({
+          id: offerId,
+          rating: 5,
+          comment: 'Привет, мир!',
+        })
+      );
+
+      const actions = extractActionsTypes(store.getActions());
+
+      expect(actions).toEqual([
+        postReviewAction.pending.type,
+        postReviewAction.rejected.type,
       ]);
     });
   });
