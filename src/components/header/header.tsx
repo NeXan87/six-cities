@@ -23,7 +23,7 @@ function Header({ isUserNav = false }: HeaderProps): JSX.Element {
             >
               <img
                 className="header__logo"
-                src="img/logo.svg"
+                src="/img/logo.svg"
                 alt="6 cities logo"
                 width={81}
                 height={41}
