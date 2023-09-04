@@ -3,7 +3,7 @@ import { AppRoute } from '../../constants';
 
 function Footer(): JSX.Element {
   return (
-    <footer className="footer container">
+    <footer className="footer container" data-testid="footer-container">
       <Link className="footer__logo-link" to={AppRoute.Root}>
         <img
           className="footer__logo"
